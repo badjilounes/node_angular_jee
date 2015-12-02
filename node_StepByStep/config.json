@@ -1,5 +1,7 @@
 {
   "port": 1337,
   "contentDirectory": "./uploads",
-  "presentationDirectory": "./presentation_content"
+  "presentationDirectory": "./presentation_content",
+  "presentationDirectoryFromController" : "../../presentation_content",
+  "contentDirectoryFromController" : "../../uploads"
 }

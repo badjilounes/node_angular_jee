@@ -13,3 +13,8 @@ router.post("/slids", multerMiddleware.single("file"), function(request, respons
 	console.log(request.file.mimetype); // Mime type of the fil
 	 
 });
+
+router.get("/slids", multerMiddleware.single("file"), function(request, response){
+	var list_pres=SlidController();
+	console.log("Liste retournée:"+ list_pres);
+});

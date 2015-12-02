@@ -3,10 +3,9 @@
  */
 
 console.log("It Works!");
-var SlidModel=require("./app/models/slid.model.js");
-
 var CONFIG = require("./config.json");
 var getListFile = require("./myListFile.js");
+var SlidModel=require("./app/models/slid.model.js");
 
 var path = require("path");
 var fs =require("fs");
@@ -89,47 +88,48 @@ app.use("/savePres", function(request, response){
 });
 
 app.use("/slids", function(request, response){
-	var queryResponse= "";
-    request.on('data', function(data) {
-        queryResponse= queryResponse +data;
-        console.log('data' + queryResponse);
-    });
-
-    request.on('end', function(){
-        console.log('end: ' + queryResponse);
-        
-        var res_json = JSON.parse(queryResponse);
-        var id_json=res_json.id;
-        
-        var slid = new SlidModel();     
-        
-        slid.type = res_json.type;
-        slid.setData(res_json.data);
-        slid.id= res_json.id;
-        slid.title = res_json.title;
-        slid.filename = res_json.filename;
-
-
-        SlidModel.create(slid, function(err, data){
-        	
-        if(err) console.log("Slid non crée !");
-        	
-        console.log("create slid");
-        console.log("Slid created:  "+data);	
-        
-        });
-        
-    });
+//	console.log("dans le use");
+//	var queryResponse= "";
+//    request.on('data', function(data) {
+//        queryResponse= queryResponse +data;
+//        console.log('data' + queryResponse);
+//    });
+//
+//    request.on('end', function(){
+//        console.log('end: ' + queryResponse);
+//        
+//        var res_json = JSON.parse(queryResponse);
+//        var id_json=res_json.id;
+//        
+//        var slid = new SlidModel();     
+//        
+//        slid.type = res_json.type;
+//        slid.setData(res_json.data);
+//        slid.id= res_json.id;
+//        slid.title = res_json.title;
+//        slid.filename = res_json.filename;
+//
+//
+//        SlidModel.create(slid, function(err, data){
+//        	
+//        if(err) console.log("Slid non crée !");
+//        	
+//        console.log("create slid");
+//        console.log("Slid created:  "+data);	
+//        
+//        });
+//        
+//    });
 });
 
-var slid = new SlidModel();
-//
-//
-slid.type = "txt";
-slid.setData("Test static pour stan");
-slid.id= "teststatic";
-slid.title ="Les test static pour stan";
-slid.filename = "teststatic.txt";
+//var slid = new SlidModel();
+////
+////
+//slid.type = "txt";
+//slid.setData("Test static pour stan");
+//slid.id= "teststatic";
+//slid.title ="Les test static pour stan";
+//slid.filename = "teststatic.txt";
 
 
 //SlidModel.create(slid, function(err, data){
