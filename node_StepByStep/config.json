@@ -2,6 +2,5 @@
   "port": 1337,
   "contentDirectory": "./uploads",
   "presentationDirectory": "./presentation_content",
-  "presentationDirectoryFromController" : "../../presentation_content",
-  "contentDirectoryFromController" : "../../uploads"
+  "presentationExtension": ".pres.json"
 }

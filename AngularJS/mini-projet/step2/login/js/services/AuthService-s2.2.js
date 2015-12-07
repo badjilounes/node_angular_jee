@@ -1,7 +1,7 @@
 angular. module ('authService', []).service('auth',authFnc);
 authFnc.$inject=['$http','$q'];
 function authFnc($http,$q) {
-	var timeout = 500;
+	var timeout = 3000;
 	var userMap={};
 	userMap['jdoe'] = {pwd: 'jd', role: "watcher"};
 	userMap['psmith'] = {pwd: 'psmithpwd', role: "admin"};

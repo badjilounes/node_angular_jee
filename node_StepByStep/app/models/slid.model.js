@@ -3,32 +3,28 @@
 
 var SlidModel=function (smodel){
 
-	
-	
 	smodel=check_attr(smodel);
 //	console.log("class slid.model.js:"+smodel.type);
-	
-	this.type=smodel.type;
 	this.id=smodel.id;
+	this.type=smodel.type;
 	this.title=smodel.title;
-	this.fileName=smodel.fileName;
+	this.filename=smodel.filename;
 	var data=smodel.data;
-	
 
 	this.setData=function (data1){
 		if (data1 === "undefined") {return -1;}
 		this.data=data1;
 	}
 
-	this.getData=function(){
-//		if (smodel === "undefined") {return -1;}
-		return this.data;
+	this.getData=function(smodel){
+		if (smodel === "undefined") {return -1;}
+		return smodel.data;
 	}
 	
 	function check_attr(smodel){
         if(typeof smodel === "undefined")
         {
-        	smodel={type: null, id: null, title: null, fileName: null, data: null};
+        	smodel={type: null, id: null, title: null, filename: null, data: null};
         }
         else{
             if(typeof smodel.type === "undefined")
@@ -37,56 +33,37 @@ var SlidModel=function (smodel){
                 smodel["id"]=null;
 			if(typeof smodel.title === "undefined")
                 smodel["title"]=null;
-			if(typeof smodel.fileName === "undefined")
-                smodel["fileName"]=null;
+			if(typeof smodel.filename === "undefined")
+                smodel["filename"]=null;
 			if(typeof smodel.data === "undefined")
                 smodel["data"]=null;
         }
         return smodel;
     }
-	
 }
-
-
-
 
 SlidModel.create=function(smodel, callback){
 	var fs =require("fs");
 	var CONFIG = JSON.parse(process.env.CONFIG);
+	var metadata_path = CONFIG.contentDirectory + "/" +smodel.id +".meta.json";
+	var filename_path = CONFIG.contentDirectory + "/" +smodel.filename;
+	var string_content = JSON.stringify(smodel);
 	
-//		
-	if(smodel.id == null || typeof smodel.id === "undefined"){
-		callback("Id du slide model null ou undefined");
-	}
-	else if(smodel.fileName == null || typeof smodel.fileName === "undefined"){
-		
-		callback("fileName du slide model null ou undefined");
-	}
-	else{
-		var metadata_path = CONFIG.presentationDirectory + "/" +smodel.id +".meta.json";
-		var fileName_path = CONFIG.presentationDirectory + "/" +smodel.fileName;
-		var string_content = JSON.stringify(smodel);
-		
-		fs.writeFile(fileName_path, smodel.data, function(err) {
-	        if(err) {
-	          return callback(err);
-	        } else {
-	          console.log("Data:"+smodel.data+" saved to " + fileName_path);     
-	          fs.writeFile(metadata_path, string_content, function(err) {
-	              if(err) {
-	            	 return callback(err);
-	              } else {
-	                console.log("meta:"+string_content+" saved to " + metadata_path);
-	              }
-	              callback(null, smodel);
-	          });
-	        }
-	       
-	    });  
-		
-	}
-	
-	
+	fs.writeFile(filename_path, smodel.data, function(err) {
+        if(err) {
+          return callback(err);
+        } else {
+          console.log("Data:"+smodel.data+" saved to " + filename_path);     
+          fs.writeFile(metadata_path, string_content, function(err) {
+              if(err) {
+            	 return callback(err);
+              } else {
+                console.log("meta:"+string_content+" saved to " + metadata_path);
+              }
+              callback(null, smodel);
+          });
+        }
+    });
 }
 
 SlidModel.read=function(id, callback){
@@ -94,67 +71,58 @@ SlidModel.read=function(id, callback){
 	var CONFIG = JSON.parse(process.env.CONFIG);
 
 //	var slidmodel= new SlidModel();
-	var slid_path=CONFIG.presentationDirectory + "/" +id +".meta.json";
-	
-//	if( typeof slid !== "undefined" && slid.id != null && slid.id != "undefined"){
+	var slid_path=CONFIG.contentDirectory + "/" +id +".meta.json";
 	fs.readFile(slid_path, function (err, data) {
 		  //utils.js
 		  if (err) return callback(err);
 		  
-//		  data_json=JSON.parse(data.toString());
-		  var slid_ret = new SlidModel(data);
-
-		  callback(null, slid_ret);
-		  
+		  //console.log("dans le read:"+data);
+		  data=data.toString();
+		  data_json=JSON.parse(data);
+		  var slid_ret = new SlidModel(data_json);
+//		  SlidModel.type = data_json.type;
+//		  SlidModel.setData(data,data_json.data);
+//		  SlidModel.filename=data_json.filename;
+//		  SlidModel.id=data_json.id;
+//		  SlidModel.title=data_json.title;
+		  //appeler constructeur
+		 // console.log("résultat:"+JSON.stringify(slidmodel));
+		  callback(null, JSON.stringify(slid_ret));
 		});
-	
-//	}
-	
 }
-	
 
 SlidModel.update=function(slid, callback){
-	
-//	SlidModel.read(slid.id,function(err, slid_lu){
-//		if(err) return callback(err);
-//		
-		if( typeof slid !== "undefined" && slid.getData().length >0 && slid.getData() != "undefined" && typeof slid.getData() !== "undefined"&& slid.id != null && slid.id != "undefined" && typeof slid.id !== "undefined"){
-			SlidModel.create(slid, function(err, slid_cree){	
-				if(err) return callback(err);	
-				callback(null, "slid updated");
-			});
-		}
-		else{
-			return callback("pas possible !");
-		}
-	
+	SlidModel.read(slid.id,function(err, slid_lu){
+		if(err) return callback(err);
 		
-		
-		
-//	});
-	
-	
+		console.log("dans le update, slid.data non null");
+		SlidModel.create(slid, function(err, data2){	
+			if(err) return callback(err);	
+			console.log(data2);
+			callback(null, JSON.stringify(slid_lu));
+		});
+	});
 }
 
-SlidModel.delete=function(id, callback){
+SlidModel.suppr=function(id, callback){
 	 var fs =require("fs");
 	 var CONFIG = JSON.parse(process.env.CONFIG);
-	 if( typeof slid !== "undefined" && slid.getData().length >0 && typeof slid.getData() !== "undefined" && slid.id != null && slid.id != "undefined"){
+	 
 	 SlidModel.read(id, function(err, data){
 		if(err) return callback(err);
-		var slid_lu =data;
-		console.log("slid_lu.id:"+slid_lu.id);
-		fs.unlink(CONFIG.presentationDirectory + "/" + slid_lu.id +".meta.json",function(data, err){
-		fs.unlink(CONFIG.presentationDirectory + "/"+slid_lu.fileName, function(data,err){
+		var slid_lu =JSON.parse(data);
+		console.log("id:"+slid_lu.id);
+
+		fs.unlink(CONFIG.contentDirectory + "/"+slid_lu.filename,function(data, err){
+		console.log("rmdir filename");
+		fs.unlink(CONFIG.contentDirectory + "/" + slid_lu.id +".meta.json", function(data,err){
+			console.log("rmdir meta json");
 			callback();
 			});
 		});
-	 });
-	 }
-	 else{
-		 return callback(null, "pas possible !");
-	 }
+		
       
-	} 
-//}
+	} );
+}
+
 module.exports = SlidModel;

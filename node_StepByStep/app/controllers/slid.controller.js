@@ -1,55 +1,63 @@
 var SlidModel=require("./../models/slid.model.js");
 var CONFIG = require("./../../config.json");
 var getListFile = require("./../../myListFile.js");
-var path =require("path");
+var path = require("path");
 
-module.exports =function (){
-	getListFile(CONFIG.presentationDirectoryFromController, "json", function(err, files) {
+function list(callback){
+    var dirpath = path.resolve(path.dirname(require.main.filename), CONFIG.contentDirectory);
+    //console.log("dirpath:" + dirpath);
+	getListFile(dirpath, "json", function(err, files) {
         if(err){
-            console.error(err);
+            console.error("Error in list(): " + err);
+            return callback(err);
         }
         else{
-                    var LoadPres = {};
-                    files.forEach(function(file){
-                        var jfile_path = path.join(CONFIG.presentationDirectoryFromController, file);
-                        jfile_path = CONFIG.presentationDirectoryFromController + "/" + file;
-                        //console.log("jpath file: " +jfile_path);
-                        var jfile = require(jfile_path);
-                        var slid = new SlidModel(jfile);
-                        LoadPres[jfile.id] = JSON.stringify(slid);
-                        });
-                    //console.log("LoadPres: " + LoadPres);
-                    //console.log("stringify: " +JSON.stringify(LoadPres));
-                    return JSON.stringify(LoadPres);
-                }
+            var list_slid = {};
+            var i= 0, len = files.length;
+            files.forEach(function(file){
+                 var jfile_path = path.join(dirpath, file);
+                 var jfile = require(jfile_path);
+                 SlidModel.read(jfile.id, function(err, slid){
+                     if(err){
+                         return callback("Error reading content: " + err);
+                     }
+                     else{
+                         slid = JSON.parse(slid);
+                         // slice to remove the '.' from './uploads'
+                         // concat with '/' because it will be written in HTML
+                         slid.src = CONFIG.contentDirectory.slice(1) +"/"+ slid.filename;
+                         list_slid[slid.id] = slid;
+                         if(i == len-1){
+                             //console.log("LIST: " + JSON.stringify(list_slid));
+                             return callback(null, list_slid);
+                         }
+                         i++;
+                     }
+                 });
             });
-//            files.forEach(function(file){
-//                var jfile_path = path.join(CONFIG.contentDirectoryFromController, file);
-//                console.log(flie);
-//                jfile_path = CONFIG.contentDirectoryFromController + "/" + file;
-//                //console.log("jpath file: " +jfile_path);
-//                var jfile = require(jfile_path);
-//                var slidmodel = new SlidModel(jfile);
-//                
-//                SlidModel.read(slidmodel.id, function(err, str_slid){
-//                	console.log("slid_lu controller:"+ str_slid);
-//                })
-//                
-//                var json_sm = JSON.parse(slidmodel);
-//                
-//                list_slid[jfile.id] = json_sm;
-//                });
-            //console.log("LoadPres: " + LoadPres);
-            //console.log("stringify: " +JSON.stringify(LoadPres));
-//        }
-////        return list_slid;
-//	});
+        }
+	});
+}
+
+function create(param, callback){
+	console.log("param: "+JSON.stringify(param));
+	var slid = new SlidModel(param);
+	slid.setData("test");
+	SlidModel.create(slid, function(err, smodel){
+		if(err){
+			callback(err);
+		}
+		else{
+			callback(null,smodel);
+			
+		}
+	});
+}
+
+function read(){
 	
 }
-//function create(){
-//	
-//}
-//
-//function read(){
-//	
-//}
+
+exports.list = list;
+exports.create = create;
+exports.read = read;
