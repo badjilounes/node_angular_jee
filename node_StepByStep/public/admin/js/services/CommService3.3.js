@@ -46,10 +46,11 @@ function commFnc($http,$q, factory){
         return deferred.promise;
     }
 
-    function savePres(pres){
+    function savePres(id, pres){
         var deferred = $q.defer();
         // FOR LOCAL TEST
-        $http.post("/savePres", JSON.stringify(pres))
+        var objTosend = {pres: pres, pres_id: pres.id, id: id};
+        $http.post("/savePres", JSON.stringify(objTosend))
             .success(function(data){
                 if(data)
                     deferred.resolve(data);
@@ -74,17 +75,15 @@ function commFnc($http,$q, factory){
             });
             socket.on('newPres', function (pres) {
                 if(pres && pres.id){
-                    scope.currentPresentation = scope.presentationMap[pres.id];
-                    console.log("current Pres has changed");
+                    scope.currentPresentation = scope.presentationMap.payload[pres.id];
+                    console.log("current Pres has changed: " + pres.title);
                 }
             });
             socket.on('currentSlidEvent', function (data) {
-                if(data.slid){
-                    if(data.slid != 0) // only on the admin side
+                if(data.slid && data.pres_id){
+                    if(data.slid != -1) // only on the admin side
                     {
-                        scope.currentSlide = data.slid;
-                        console.log("currentSlide ID: " + scope.currentSlide.id);
-                        scope.$apply();
+                        scope.update_content(data.pres_id, data.slid);
                     }
                     // else: the slide did not change because its in the first or last position.
                 }
@@ -94,6 +93,10 @@ function commFnc($http,$q, factory){
                 if(data)
                     console.warn(data);
                 //if(data.content && data.content !== null)
+            });
+
+            socket.on("disconnect", function(){
+               scope.forceReloging();
             });
             return socket;
         }
