@@ -56,6 +56,7 @@ router.post("/slids", upload.single("file"), function(request, response){
 });
 
 router.get("/slids", function(request, response){
+	
 	SlidController.list(function(err, listSlid){
 		if(err){
 			response.status(400).send("List of contents not available. Cause: " + err);
@@ -65,8 +66,34 @@ router.get("/slids", function(request, response){
 			response.json(listSlid);
 		}
 	});
+	
+	console.log(request.url);
 });
 
+router.get("/slids/:id", function(request, response){
+	console.log(request.url);
+	var id = request.url.split("/slids/");
+	console.log(id);
+	
+	SlidController.read(id[1], function(err, slid){
+		if(err){
+			response.status(400).send("Slid not available. Cause: " + err);
+		}
+		else{
+			console.log("test");
+			response.json(JSON.parse(slid));
+		}
+	});
+//	SlidController.list(function(err, listSlid){
+//		if(err){
+//			response.status(400).send("List of contents not available. Cause: " + err);
+//		}
+//		else{
+//			//console.log("List slid: " + listSlid); //  The full path to the uploaded file
+//			response.json(listSlid);
+//		}
+//	});
+});
 
 
 module.exports = router;

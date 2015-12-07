@@ -60,8 +60,17 @@ function create(param, isMetaOnly, callback){
 	});
 }
 
-function read(){
-	
+function read(id, callback){
+	SlidModel.read(id, function(err, slid){
+		if(err){
+			return callback(err);
+		}
+		else{
+			console.log("slid lu:" + slid);
+			callback(null, slid);
+		}
+		
+	});
 }
 
 exports.list = list;
